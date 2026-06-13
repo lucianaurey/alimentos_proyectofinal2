@@ -16,7 +16,7 @@ class Config:
     # ── Base de datos ────────────────────────────────────────────
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
-        "postgresql+psycopg2://postgres:12345@localhost:5432/alimentos",
+        "postgresql+psycopg2://user_alimentos:5ikk7brc98fxziG7eujmiKx9KRKimAcG@dpg-d8mk8l4m0tmc73d7u0v0-a.oregon-postgres.render.com/alimentos_proyecto",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
