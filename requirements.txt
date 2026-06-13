@@ -8,3 +8,4 @@ python-dotenv>=1.0.1
 werkzeug>=3.0.1
 wtforms>=3.1.2
 sqlalchemy>=2.0.25
+gunicorn==22.0.0
