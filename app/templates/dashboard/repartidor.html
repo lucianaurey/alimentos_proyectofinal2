@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Repartidor{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fa-solid fa-map-location-dot"></i>Mi Dashboard</h1>
+  <p>Tu rendimiento de entregas, zonas activas e historial · {{ current_user.nombre_completo }}</p>
+</div>
+
+<!-- KPIs -->
+<div class="kpis-grid" id="kpis-container">
+  {% for _ in range(4) %}
+  <div class="col">
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa-solid fa-spinner fa-spin" style="color:var(--rojo-claro);"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value"><span class="skeleton" style="width:80px;display:inline-block;">&nbsp;</span></div>
+        <div class="kpi-label"><span class="skeleton" style="width:120px;display:inline-block;">&nbsp;</span></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Section: Rendimiento -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-chart-line"></i></div>
+  <span class="section-divider__text">Rendimiento de Entregas</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="charts-grid-2">
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-chart-line"></i>Entregas por Día
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-entregas-dia"></canvas></div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-map-pin"></i>Mis Zonas de Entrega
+    </div>
+    <div class="chart-canvas-lg" style="display:flex;align-items:center;justify-content:center;">
+      <canvas id="chart-zonas" style="max-width:280px;"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section: Disponibilidad y Estado de Pedidos -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-motorcycle"></i></div>
+  <span class="section-divider__text">Disponibilidad y Estado de Pedidos</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="charts-grid-2">
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-circle-dot"></i>Disponibilidad de Repartidores
+    </div>
+    <div class="chart-canvas-lg" style="display:flex;align-items:center;justify-content:center;">
+      <canvas id="chart-vehiculos" style="max-width:280px;"></canvas>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-list-check"></i>Estado de Mis Pedidos
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-semanal"></canvas></div>
+  </div>
+</div>
+
+<!-- Section: Historial -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+  <span class="section-divider__text">Historial de Entregas</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-title">
+    <i class="fa-solid fa-clock-rotate-left"></i>Historial de Entregas
+  </div>
+  <table id="tabla-historial" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead id="thead-historial"></thead>
+    <tbody id="tbody-historial">
+      <tr><td colspan="5" class="text-center py-3" style="color:var(--texto-ter);">Cargando…</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard_repartidor.js') }}"></script>
+{% endblock %}

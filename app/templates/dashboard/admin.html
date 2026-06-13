@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fa-solid fa-chart-pie"></i>Dashboard Administrador</h1>
+  <p>Resumen operativo y financiero de toda la plataforma Foodly · Datos en tiempo real.</p>
+</div>
+
+<div class="filters-bar">
+  <label>Año</label>
+  <select id="f-anio">
+    <option value="" selected>Todos</option>
+    <option value="2024">2024</option>
+    <option value="2025">2025</option>
+    <option value="2026">2026</option>
+  </select>
+  <label>Mes</label>
+  <select id="f-mes">
+    <option value="">Todos</option>
+    {% for m,n in [('1','Enero'),('2','Febrero'),('3','Marzo'),('4','Abril'),('5','Mayo'),('6','Junio'),
+                   ('7','Julio'),('8','Agosto'),('9','Septiembre'),('10','Octubre'),('11','Noviembre'),('12','Diciembre')] %}
+    <option value="{{ m }}">{{ n }}</option>
+    {% endfor %}
+  </select>
+  <label>Zona</label>
+  <select id="f-zona">
+    <option value="">Todas</option>
+    <option>Norte</option><option>Sur</option><option>Centro</option><option>Este</option><option>Oeste</option>
+  </select>
+  <button class="btn-filter" onclick="cargarTodo()">
+    <i class="fa-solid fa-rotate-right"></i> Actualizar
+  </button>
+</div>
+
+<!-- KPIs -->
+<div class="kpis-grid" id="kpis-container">
+  {% for _ in range(6) %}
+  <div class="col">
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa-solid fa-spinner fa-spin" style="color:var(--rojo-claro);"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value"><span class="skeleton" style="width:80px;display:inline-block;">&nbsp;</span></div>
+        <div class="kpi-label"><span class="skeleton" style="width:120px;display:inline-block;">&nbsp;</span></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Section: Gráficos Principales -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-chart-line"></i></div>
+  <span class="section-divider__text">Análisis de Ventas</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="charts-grid-2">
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-chart-line"></i>Ingresos por Mes (Bs)
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-ventas-mes"></canvas></div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-chart-pie"></i>Distribución por Estado
+    </div>
+    <div class="chart-canvas-lg" style="display:flex;align-items:center;justify-content:center;">
+      <canvas id="chart-pedidos-estado" style="max-width:280px;"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Section: Restaurantes & Zonas -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-trophy"></i></div>
+  <span class="section-divider__text">Performance por Restaurante y Zona</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="charts-grid-2">
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-trophy"></i>Top 10 Restaurantes
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-top-restaurantes"></canvas></div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-map-location-dot"></i>Pedidos por Zona
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-pedidos-zona"></canvas></div>
+  </div>
+</div>
+
+<!-- Section: Ranking -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-ranking-star"></i></div>
+  <span class="section-divider__text">Ranking Detallado</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+    <span><i class="fa-solid fa-ranking-star"></i>Ranking de Restaurantes</span>
+    <span style="font-size:11px;color:var(--texto-ter);font-weight:400;">Ingresos · Pedidos · Ticket promedio</span>
+  </div>
+  <table id="tabla-ranking" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead id="thead-ranking"></thead>
+    <tbody id="tbody-ranking">
+      <tr><td colspan="6" class="text-center py-3" style="color:var(--texto-ter);">Cargando…</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard_admin.js') }}"></script>
+{% endblock %}

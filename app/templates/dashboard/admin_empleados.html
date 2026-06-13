@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Empleados{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fa-solid fa-user-tie"></i> Dashboard Empleados</h1>
+  <p>Selecciona un empleado para ver su dashboard operativo en tiempo real.</p>
+</div>
+
+<!-- Selector de empleado -->
+<div class="table-card" style="margin-bottom:1.5rem;">
+  <div class="table-card-title"><i class="fa-solid fa-magnifying-glass"></i> Seleccionar empleado</div>
+
+  <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+    <div style="flex:1;min-width:250px;">
+      <label style="font-size:11px;color:var(--texto-sec);display:block;margin-bottom:5px;
+                    text-transform:uppercase;letter-spacing:.05em;">Nombre del empleado</label>
+      <select id="sel-empleado" onchange="cargarEmpleado()"
+              style="width:100%;background:var(--crema);border:1px solid var(--crema-borde);
+                     border-radius:10px;padding:10px 14px;font-size:13px;
+                     font-family:var(--font-ui);color:var(--negro);outline:none;
+                     transition:border-color .2s;">
+        <option value="">— Selecciona un empleado —</option>
+        {% for u in empleados %}
+        <option value="{{ u.id_empleado }}" data-nombre="{{ u.nombre }} {{ u.apellido_paterno }}">
+          {{ u.nombre }} {{ u.apellido_paterno }}
+        </option>
+        {% else %}
+        <option disabled>Sin empleados registrados</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button onclick="limpiar()"
+            style="background:var(--crema);border:1px solid var(--crema-borde);border-radius:10px;
+                   padding:10px 18px;font-size:13px;font-family:var(--font-ui);
+                   color:var(--texto-sec);cursor:pointer;white-space:nowrap;">
+      <i class="fa-solid fa-xmark"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Estado vacío -->
+  <div id="estado-vacio" style="text-align:center;padding:2.5rem 1rem;color:var(--texto-ter);">
+    <i class="fa-solid fa-user-tie" style="font-size:2.5rem;opacity:.2;display:block;margin-bottom:10px;"></i>
+    <div style="font-size:13px;">Selecciona un empleado para ver su dashboard</div>
+  </div>
+</div>
+
+<!-- Panel del empleado seleccionado -->
+<div id="panel-empleado" style="display:none;">
+
+  <!-- Header del empleado -->
+  <div style="background:var(--negro);border-radius:14px;padding:1rem 1.5rem;
+              margin-bottom:1.5rem;display:flex;align-items:center;gap:14px;">
+    <div id="emp-avatar"
+         style="width:46px;height:46px;border-radius:50%;background:#2a9d8f;color:#fff;
+                font-size:18px;font-weight:600;display:flex;align-items:center;
+                justify-content:center;flex-shrink:0;"></div>
+    <div>
+      <div id="emp-nombre" style="font-size:16px;font-weight:500;color:#fff;"></div>
+      <span style="font-size:11px;background:#E1F5EE;color:#085041;padding:2px 10px;
+                   border-radius:10px;display:inline-block;margin-top:4px;">
+        <i class="fa-solid fa-user-tie"></i> Empleado
+      </span>
+    </div>
+    <div style="margin-left:auto;font-size:11px;color:rgba(255,255,255,.3);">
+      Vista de administrador · Solo lectura
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-grid" id="emp-kpis" style="margin-bottom:1.5rem;"></div>
+
+  <!-- Gráficos -->
+  <div class="section-divider">
+    <div class="section-divider__icon"><i class="fa-solid fa-chart-bar"></i></div>
+    <span class="section-divider__text">Métricas operativas</span>
+    <div class="section-divider__line"></div>
+  </div>
+
+  <div class="charts-grid-2" style="margin-bottom:1.5rem;">
+    <div class="table-card">
+      <div class="table-card-title">
+        <i class="fa-solid fa-box"></i> Productos más vendidos
+      </div>
+      <div class="chart-canvas-md"><canvas id="emp-chart-productos"></canvas></div>
+    </div>
+    <div class="table-card">
+      <div class="table-card-title">
+        <i class="fa-solid fa-circle-half-stroke"></i> Estado de Pedidos
+      </div>
+      <div class="chart-canvas-md" style="display:flex;align-items:center;justify-content:center;">
+        <canvas id="emp-chart-estado"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos adicionales: pedidos por hora e ingresos por método -->
+  <div class="section-divider">
+    <div class="section-divider__icon"><i class="fa-solid fa-clock"></i></div>
+    <span class="section-divider__text">Tipo de Pago e Ingresos por Método</span>
+    <div class="section-divider__line"></div>
+  </div>
+
+  <div class="charts-grid-2" style="margin-bottom:1.5rem;">
+    <div class="table-card">
+      <div class="table-card-title">
+        <i class="fa-solid fa-clock"></i> Pedidos por tipo de pago
+      </div>
+      <div class="chart-canvas-md"><canvas id="emp-chart-horas"></canvas></div>
+    </div>
+    <div class="table-card">
+      <div class="table-card-title">
+        <i class="fa-solid fa-wallet"></i> Ingresos por método de entrega
+      </div>
+      <div class="chart-canvas-md"><canvas id="emp-chart-ingresos-metodo"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Tabla últimos pedidos -->
+  <div class="section-divider">
+    <div class="section-divider__icon"><i class="fa-solid fa-list"></i></div>
+    <span class="section-divider__text">Últimos pedidos</span>
+    <div class="section-divider__line"></div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-clipboard-list"></i> Historial de pedidos recientes
+    </div>
+    <table id="emp-tabla" class="table table-hover" style="font-size:13px;width:100%;">
+      <thead id="emp-thead"></thead>
+      <tbody id="emp-tbody">
+        <tr><td colspan="6" class="text-center py-3" style="color:var(--texto-ter);">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Colores Polar Area (paleta landing) ───────────────
+const ESTADO_COLORES = [
+  "rgba(67,176,175,.80)",
+  "rgba(42,48,86,.75)",
+  "rgba(103,255,242,.70)",
+  "rgba(129,236,134,.75)",
+  "rgba(239,68,68,.65)",
+];
+const ESTADO_BORDERS = ["#43B0AF","#2A3056","#67FFF2","#81EC86","#ef4444"];
+
+function renderPolarArea(canvasId, labels, data) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ex = Chart.getChart(canvas);
+  if (ex) ex.destroy();
+  new Chart(canvas, {
+    type: "polarArea",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: ESTADO_COLORES.slice(0, labels.length),
+        borderColor:     ESTADO_BORDERS.slice(0, labels.length),
+        borderWidth: 2,
+        hoverBorderWidth: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: "easeOutQuart" },
+      plugins: {
+        legend: {
+          display: true, position: "bottom",
+          labels: { usePointStyle: true, pointStyle: "circle", padding: 14,
+            font: { size: 11, family: "'Outfit', sans-serif", weight: "500" }, color: "#4a5568" },
+        },
+        tooltip: {
+          backgroundColor: "rgba(30,35,64,.95)",
+          titleFont: { size: 13, weight: "600", family: "'Outfit', sans-serif" },
+          bodyFont:  { size: 12, family: "'Inter', sans-serif" },
+          padding: { x: 14, y: 10 }, cornerRadius: 10,
+          callbacks: {
+            label: (ctx) => {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = total > 0 ? ((ctx.parsed.r / total) * 100).toFixed(1) : 0;
+              return `  ${ctx.parsed.r} pedidos (${pct}%)`;
+            },
+          },
+        },
+      },
+      scales: {
+        r: {
+          grid: { color: "rgba(67,176,175,.10)" },
+          ticks: { backdropColor: "transparent", color: "#64748b", font: { size: 9 } },
+          suggestedMin: 0,
+        },
+      },
+    },
+  });
+}
+
+async function cargarEmpleado() {
+  const sel    = document.getElementById("sel-empleado");
+  const userId = sel.value;
+  if (!userId) { limpiar(); return; }
+  const nombre = sel.options[sel.selectedIndex].dataset.nombre;
+
+  ["emp-chart-productos","emp-chart-estado","emp-chart-horas","emp-chart-ingresos-metodo"].forEach(id => {
+    const ex = Chart.getChart(document.getElementById(id));
+    if (ex) ex.destroy();
+  });
+
+  document.getElementById("estado-vacio").style.display  = "none";
+  document.getElementById("panel-empleado").style.display = "block";
+  document.getElementById("emp-avatar").textContent       = nombre[0].toUpperCase();
+  document.getElementById("emp-nombre").textContent       = nombre;
+  document.getElementById("panel-empleado").scrollIntoView({ behavior: "smooth" });
+
+  const kpis = await fetchData(`/dashboard/api/empleado/kpis?id=${userId}`);
+  if (kpis) renderKpis("emp-kpis", kpis);
+
+  // Productos (barra horizontal con paleta teal)
+  const prod = await fetchData(`/dashboard/api/empleado/productos-vendidos?id=${userId}`);
+  if (prod) {
+    const canvas = document.getElementById("emp-chart-productos");
+    if (canvas) {
+      const ex = Chart.getChart(canvas); if (ex) ex.destroy();
+      const barColors = (prod.data || []).map((_, i) =>
+        `rgba(67,176,175,${Math.max(1-(i*.07),.30)})`);
+      new Chart(canvas, {
+        type: "bar",
+        data: { labels: prod.labels, datasets: [{ label: "Unidades", data: prod.data,
+          backgroundColor: barColors, borderRadius: 6, borderSkipped: false, barThickness: 16 }] },
+        options: {
+          indexAxis: "y", responsive: true, maintainAspectRatio: false,
+          animation: { duration: 700, easing: "easeOutQuart" },
+          plugins: { legend: { display: false },
+            tooltip: { backgroundColor: "rgba(30,35,64,.95)", cornerRadius: 10,
+              callbacks: { label: (c) => ` ${c.parsed.x} unidades` } } },
+          scales: {
+            x: { grid: { color: "rgba(67,176,175,.08)" }, ticks: { color: "#64748b", font: { size: 10 } }, border: { display: false } },
+            y: { grid: { display: false }, ticks: { color: "#2A3056", font: { size: 11, weight: "500" } }, border: { display: false } },
+          },
+        },
+      });
+    }
+  }
+
+  // Estado → Polar Area
+  const estado = await fetchData(`/dashboard/api/empleado/pedidos-estado?id=${userId}`);
+  if (estado) renderPolarArea("emp-chart-estado", estado.labels, estado.data);
+
+  // Pedidos por tipo de pago
+  const horas = await fetchData(`/dashboard/api/empleado/tipo-pago?id=${userId}`);
+  if (horas) {
+    const ch = document.getElementById("emp-chart-horas");
+    if (ch) {
+      const exh = Chart.getChart(ch); if (exh) exh.destroy();
+      const TC=["rgba(42,48,86,.85)","rgba(67,176,175,.80)","rgba(226,91,56,.80)","rgba(103,255,242,.70)","rgba(129,236,134,.75)"];
+      const TB=["#2A3056","#43B0AF","#E25B38","#67FFF2","#81EC86"];
+      new Chart(ch, { type:"doughnut", data:{ labels:horas.labels, datasets:[{ data:horas.data, backgroundColor:TC.slice(0,horas.labels.length), borderColor:TB.slice(0,horas.labels.length), borderWidth:2, hoverOffset:12 }]}, options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", animation:{ duration:900 }, plugins:{ legend:{ display:true, position:"bottom", labels:{ usePointStyle:true, pointStyle:"circle", padding:12, font:{ size:11, family:"'Outfit',sans-serif" }, color:"#4a5568" }}, tooltip:{ backgroundColor:"rgba(30,35,64,.95)", cornerRadius:10, callbacks:{ label:(ctx)=>{ const t=ctx.dataset.data.reduce((a,b)=>a+b,0); const p=t>0?((ctx.parsed/t)*100).toFixed(1):0; return `  ${ctx.parsed} pedido(s) · ${p}%`; }}}}}});
+    }
+  }
+
+  // Ingresos por método
+  const ingmet = await fetchData(`/dashboard/api/empleado/ingresos-metodo?id=${userId}`);
+  if (ingmet) {
+    const cm = document.getElementById("emp-chart-ingresos-metodo");
+    if (cm) {
+      const exm = Chart.getChart(cm); if (exm) exm.destroy();
+      const COLS = ["rgba(67,176,175,.85)","rgba(226,91,56,.80)","rgba(42,48,86,.80)","rgba(103,255,242,.75)","rgba(129,236,134,.75)"];
+      new Chart(cm, { type:"bar", data:{ labels:ingmet.labels, datasets:[{ label:"Ingresos (Bs)", data:ingmet.data, backgroundColor:COLS.slice(0,ingmet.labels.length), borderRadius:8, borderSkipped:false, barThickness:30 }]}, options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false, animation:{ duration:800 }, plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:"rgba(30,35,64,.95)", cornerRadius:10, callbacks:{ label:(c)=>`  Bs ${Number(c.parsed.x).toLocaleString("es-BO",{minimumFractionDigits:2})}` }}}, scales:{ x:{ grid:{ color:"rgba(67,176,175,.08)" }, ticks:{ color:"#64748b", font:{ size:10 }}, border:{ display:false }}, y:{ grid:{ display:false }, ticks:{ color:"#2A3056", font:{ size:12, weight:"500" }}, border:{ display:false }}}}});
+    }
+  }
+
+  const pedidos = await fetchData(`/dashboard/api/empleado/ultimos-pedidos?id=${userId}`);
+  if (pedidos) renderTabla("emp-tbody", "emp-thead", pedidos);
+}
+
+function limpiar() {
+  document.getElementById("sel-empleado").value          = "";
+  document.getElementById("estado-vacio").style.display  = "block";
+  document.getElementById("panel-empleado").style.display = "none";
+
+  if ($.fn.DataTable.isDataTable("#emp-tabla")) $("#emp-tabla").DataTable().destroy();
+  ["emp-chart-productos","emp-chart-estado","emp-chart-horas","emp-chart-ingresos-metodo"].forEach(id => {
+    const ex = Chart.getChart(document.getElementById(id));
+    if (ex) ex.destroy();
+  });
+  document.getElementById("emp-kpis").innerHTML  = "";
+  document.getElementById("emp-thead").innerHTML = "";
+  document.getElementById("emp-tbody").innerHTML = "";
+}
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Minimarkets{% endblock %}
+
+{% block content %}
+
+{# ── Cabecera ─────────────────────────────────── #}
+<div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1><i class="fa-solid fa-store" style="color:var(--rojo-claro);margin-right:8px;"></i>Minimarkets</h1>
+    <p>Directorio completo de minimarkets registrados en la plataforma Foodly.</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="font-size:12px;color:var(--texto-ter);">
+      <i class="fa-solid fa-store"></i>
+      <strong style="color:var(--negro);">{{ minimarkets | length }}</strong> registros
+    </span>
+  </div>
+</div>
+
+{# ── Tabla ────────────────────────────────────── #}
+<div class="table-card">
+  <div class="table-card-title">
+    <i class="fa-solid fa-list" style="color:var(--rojo-claro);margin-right:6px;"></i>
+    Lista de Minimarkets
+  </div>
+
+  <table id="tabla-minimarkets" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead>
+      <tr style="font-size:11px;color:var(--texto-ter);">
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Encargado</th>
+        <th>Zona</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mini, zona in minimarkets %}
+      <tr>
+        <td style="color:var(--texto-ter);font-size:11px;">{{ mini.id_minimarket }}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;background:var(--negro);color:var(--rojo-claro);
+                        border-radius:8px;display:flex;align-items:center;justify-content:center;
+                        font-size:13px;font-weight:600;flex-shrink:0;">
+              {{ mini.nombre[0] | upper if mini.nombre else '?' }}
+            </div>
+            <span style="font-weight:500;">{{ mini.nombre or '—' }}</span>
+          </div>
+        </td>
+        <td style="color:var(--texto-sec);">
+          {% if mini.encargado %}
+            <span style="font-size:12px;"><i class="fa-solid fa-user-tie" style="font-size:10px;color:var(--texto-ter);margin-right:4px;"></i>{{ mini.encargado }}</span>
+          {% else %}
+            <span style="color:var(--texto-ter);font-size:11px;">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if zona %}
+            <span style="font-size:11px;background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:10px;">
+              <i class="fa-solid fa-location-dot" style="font-size:9px;"></i> {{ zona }}
+            </span>
+          {% else %}
+            <span style="color:var(--texto-ter);font-size:11px;">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('minimarket.detalle', id=mini.id_minimarket) }}"
+             class="btn btn-sm"
+             style="background:var(--negro);color:#fff;border-radius:6px;font-size:11px;padding:4px 12px;">
+            <i class="fa-solid fa-eye"></i> Ver
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-center py-4" style="color:var(--texto-ter);">
+          <i class="fa-solid fa-store fa-2x" style="opacity:.3;display:block;margin-bottom:8px;"></i>
+          No hay minimarkets registrados
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if ($('#tabla-minimarkets tbody tr').length > 1) {
+    $('#tabla-minimarkets').DataTable({
+      pageLength: 15,
+      order: [[1, 'asc']],
+      language: {
+        search:      'Buscar:',
+        lengthMenu:  'Mostrar _MENU_ filas',
+        info:        'Mostrando _START_–_END_ de _TOTAL_ minimarkets',
+        paginate:    { next: '›', previous: '‹' },
+        emptyTable:  'No hay minimarkets disponibles',
+        zeroRecords: 'Sin resultados para la búsqueda',
+      },
+      columnDefs: [{ orderable: false, targets: [4] }]
+    });
+  }
+});
+</script>
+{% endblock %}

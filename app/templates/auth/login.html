@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar sesión · Foodly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* ══════════════════════════════════════════════
+       Foodly Login – Paleta del Landing
+       #2A3056 · #43B0AF · #67FFF2 · #81EC86
+       ══════════════════════════════════════════════ */
+    :root{
+      --brand:#43B0AF; --brand-h:#3a9d9c; --brand-glow:rgba(67,176,175,.25);
+      --cyan:#67FFF2; --navy:#2A3056; --navy-deep:#1e2340; --navy-dark:#151a33;
+      --green:#81EC86; --green-dark:#294933; --sage:#446B5C;
+      --bg:#0f1326; --bg-surface:#171c38; --bg-card:#1e2445;
+      --border:rgba(67,176,175,.12); --border-h:rgba(103,255,242,.3);
+      --text-1:#f0f8ff; --text-2:#94a3b8; --text-3:#64748b;
+      --text-dark:#1a2332; --text-dark-2:#4a5568;
+      --crema:#f0f5f4; --crema-borde:#c5d5d3;
+      --r-full:9999px; --r-lg:20px; --r-md:14px; --r-sm:10px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, #1a2040 50%, var(--navy) 100%);
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;
+      position:relative;overflow:hidden;
+    }
+    body::before{
+      content:'';position:absolute;top:-200px;right:-200px;
+      width:600px;height:600px;
+      background:radial-gradient(circle,rgba(67,176,175,.12) 0%,transparent 65%);
+      pointer-events:none;animation:glow 6s ease-in-out infinite alternate;
+    }
+    body::after{
+      content:'';position:absolute;bottom:-150px;left:-150px;
+      width:400px;height:400px;
+      background:radial-gradient(circle,rgba(129,236,134,.06) 0%,transparent 65%);
+      pointer-events:none;
+    }
+    @keyframes glow{
+      from{transform:scale(1);opacity:.6;}
+      to{transform:scale(1.2) translate(-20px,15px);opacity:1;}
+    }
+
+    .login-wrapper{
+      display:grid;grid-template-columns:1fr 1fr;max-width:880px;width:100%;
+      border-radius:22px;overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 40px rgba(67,176,175,.12);
+      position:relative;z-index:2;border:1px solid var(--border);
+    }
+
+    /* Panel izquierdo */
+    .login-left{
+      background:linear-gradient(180deg,var(--navy-deep) 0%,var(--navy) 100%);
+      padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:space-between;
+      position:relative;overflow:hidden;
+    }
+    .login-left::before{
+      content:'';position:absolute;top:-80px;right:-80px;
+      width:220px;height:220px;
+      background:radial-gradient(circle,rgba(103,255,242,.07) 0%,transparent 65%);
+      pointer-events:none;
+    }
+    .login-left::after{
+      content:'';position:absolute;bottom:-60px;left:-60px;
+      width:160px;height:160px;
+      background:radial-gradient(circle,rgba(129,236,134,.05) 0%,transparent 65%);
+      pointer-events:none;
+    }
+    .login-brand{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+    .login-brand-icon{
+      width:40px;height:40px;
+      background:linear-gradient(135deg,var(--brand),var(--cyan));
+      border-radius:12px;display:flex;align-items:center;justify-content:center;
+      color:var(--navy-dark);font-size:18px;
+      box-shadow:0 0 20px var(--brand-glow);
+    }
+    .login-brand-name{font-family:'Outfit',sans-serif;font-size:22px;color:var(--text-1);font-weight:700}
+    .login-brand-name span{color:var(--cyan)}
+    .login-left h2{
+      font-family:'Outfit',sans-serif;font-size:26px;color:var(--text-1);
+      font-weight:700;line-height:1.3;margin-bottom:.75rem;letter-spacing:-.02em;
+    }
+    .login-left p{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:2rem}
+    .roles-list{display:flex;flex-direction:column;gap:8px}
+    .role-item{
+      display:flex;align-items:center;gap:10px;
+      background:rgba(67,176,175,.06);
+      border:.5px solid var(--border);
+      border-radius:12px;padding:10px 14px;
+      transition:all .3s ease;
+    }
+    .role-item:hover{
+      background:rgba(67,176,175,.12);
+      border-color:var(--border-h);
+      transform:translateX(4px);
+    }
+    .role-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    .role-item-name{font-family:'Outfit',sans-serif;font-size:13px;color:var(--text-1);font-weight:500}
+    .role-item-desc{font-size:11px;color:var(--text-3);margin-left:auto}
+
+    /* Panel derecho */
+    .login-right{
+      background:var(--bg-surface);
+      padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:center;
+      border-left:1px solid var(--border);
+    }
+    .login-right h3{
+      font-family:'Outfit',sans-serif;font-size:24px;color:var(--text-1);
+      font-weight:700;margin-bottom:4px;letter-spacing:-.02em;
+    }
+    .login-right .subtitle{font-size:13px;color:var(--text-2);margin-bottom:1.75rem}
+
+    .f-label{
+      font-family:'Outfit',sans-serif;font-size:11px;color:var(--text-2);
+      display:block;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;
+    }
+    .f-input,.f-select{
+      width:100%;
+      background:rgba(255,255,255,.05);
+      border:1.5px solid var(--border);
+      border-radius:10px;padding:11px 14px;
+      font-size:13px;color:var(--text-1);
+      font-family:'Inter',sans-serif;margin-bottom:12px;
+      transition:all .2s ease;outline:none;
+    }
+    .f-input::placeholder{color:var(--text-3)}
+    .f-input:focus,.f-select:focus{
+      border-color:var(--brand);
+      box-shadow:0 0 0 3px rgba(67,176,175,.15);
+      background:rgba(67,176,175,.05);
+    }
+    /* Select options legibles */
+    .f-select option{background:var(--navy-deep);color:var(--text-1)}
+
+    .f-btn{
+      width:100%;
+      background:linear-gradient(135deg,var(--brand),var(--cyan));
+      color:var(--navy-dark);
+      border:none;border-radius:var(--r-full);padding:13px;
+      font-size:14px;font-weight:700;cursor:pointer;
+      font-family:'Outfit',sans-serif;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .3s ease;margin-top:4px;
+      box-shadow:0 4px 20px var(--brand-glow);
+      position:relative;overflow:hidden;
+      letter-spacing:.01em;
+    }
+    .f-btn::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.2) 50%,transparent 70%);
+      transform:translateX(-100%);transition:transform .6s ease;
+    }
+    .f-btn:hover::before{transform:translateX(100%);}
+    .f-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 30px rgba(103,255,242,.35);
+    }
+    .f-forgot{
+      font-size:11px;color:var(--brand);display:block;
+      text-align:right;margin-top:-8px;margin-bottom:12px;
+      text-decoration:none;transition:color .2s;
+    }
+    .f-forgot:hover{color:var(--cyan)}
+
+    .alert-foodly{
+      font-size:12px;border-radius:10px;padding:8px 12px;margin-bottom:12px;
+      background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
+      color:#fca5a5;
+    }
+    .alert-foodly.alert-success{
+      background:rgba(129,236,134,.1);border-color:rgba(129,236,134,.2);color:#86efac;
+    }
+    .alert-foodly.alert-warning{
+      background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);color:#fcd34d;
+    }
+
+    .remember-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:12px;color:var(--text-2)}
+    .remember-row input{accent-color:var(--brand)}
+
+    /* Divider */
+    .login-divider{
+      display:flex;align-items:center;gap:12px;margin:1rem 0;
+    }
+    .login-divider span{font-size:11px;color:var(--text-3);white-space:nowrap}
+    .login-divider::before,.login-divider::after{
+      content:'';flex:1;height:1px;background:var(--border);
+    }
+
+    @media(max-width:640px){
+      .login-wrapper{grid-template-columns:1fr}
+      .login-left{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+  <!-- Izquierda -->
+  <div class="login-left">
+    <div>
+      <div class="login-brand">
+        <div class="login-brand-icon"><i class="fa-solid fa-burger"></i></div>
+        <div class="login-brand-name">Food<span>ly</span></div>
+      </div>
+      <h2>Bienvenido al sistema</h2>
+      <p>Accede con tu cuenta para gestionar pedidos, restaurantes, minimarkets y reportes analíticos de Cochabamba.</p>
+      <div class="roles-list">
+        <div class="role-item">
+          <div class="role-dot" style="background:var(--cyan)"></div>
+          <span class="role-item-name">Administrador</span>
+          <span class="role-item-desc">Visión global</span>
+        </div>
+        <div class="role-item">
+          <div class="role-dot" style="background:var(--brand)"></div>
+          <span class="role-item-name">Empleado</span>
+          <span class="role-item-desc">Operaciones</span>
+        </div>
+        <div class="role-item">
+          <div class="role-dot" style="background:var(--green)"></div>
+          <span class="role-item-name">Repartidor</span>
+          <span class="role-item-desc">Entregas</span>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#64748b;margin-top:2rem">Foodly · Cochabamba, Bolivia · 2025</div>
+  </div>
+
+  <!-- Derecha -->
+  <div class="login-right">
+    <h3>Iniciar sesión</h3>
+    <p class="subtitle">Ingresa tus credenciales para continuar</p>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert-foodly alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else '' }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+      {{ form.hidden_tag() }}
+
+      <label class="f-label">Correo electrónico o usuario</label>
+      {{ form.username(class="f-input", placeholder="admin@foodly.bo") }}
+      {% if form.username.errors %}
+        <div style="font-size:11px;color:#ef4444;margin-top:-8px;margin-bottom:8px">{{ form.username.errors[0] }}</div>
+      {% endif %}
+
+      <label class="f-label">Contraseña</label>
+      {{ form.password(class="f-input", placeholder="••••••••") }}
+      <a href="#" class="f-forgot">¿Olvidaste tu contraseña?</a>
+      {% if form.password.errors %}
+        <div style="font-size:11px;color:#ef4444;margin-top:-8px;margin-bottom:8px">{{ form.password.errors[0] }}</div>
+      {% endif %}
+
+      <label class="f-label">Rol de acceso</label>
+      {{ form.rol(class="f-select") }}
+
+      <div class="remember-row">
+        {{ form.remember() }}
+        <label for="{{ form.remember.id }}">Recordarme</label>
+      </div>
+
+      <button type="submit" class="f-btn">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        Acceder al sistema
+      </button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

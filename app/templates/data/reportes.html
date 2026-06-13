@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fa-solid fa-file-lines"></i> Reportes</h1>
+  <p>Generación y exportación de reportes analíticos en CSV · Datos reales de la plataforma</p>
+</div>
+
+<!-- Cards de reportes disponibles -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:2rem;">
+
+  <!-- Reporte 1: Ventas por mes -->
+  <div class="table-card reporte-card" data-reporte="ventas">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--negro),#2d1810);
+                  border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--rojo-claro);font-size:18px;">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--negro);">Ventas por Mes</div>
+        <div style="font-size:11px;color:var(--texto-ter);">Ingresos agregados mensualmente</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--texto-sec);line-height:1.6;margin-bottom:1.25rem;">
+      Evolución de ingresos de la plataforma por mes y año, incluyendo totales de pagos registrados.
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;">
+      <select class="rep-select" id="r-anio-ventas">
+        <option value="">Todos los años</option>
+        <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
+      </select>
+    </div>
+    <button onclick="generarReporte('ventas')" class="rep-btn">
+      <i class="fa-solid fa-download"></i> Generar y Descargar CSV
+    </button>
+  </div>
+
+  <!-- Reporte 2: Top restaurantes -->
+  <div class="table-card reporte-card" data-reporte="restaurantes">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--rojo-claro),#FF8C5A);
+                  border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--negro);">Ranking Restaurantes</div>
+        <div style="font-size:11px;color:var(--texto-ter);">Por ingresos y pedidos</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--texto-sec);line-height:1.6;margin-bottom:1.25rem;">
+      Ranking completo de restaurantes con ingresos totales, número de pedidos y ticket promedio por zona.
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;">
+      <select class="rep-select" id="r-zona-rest">
+        <option value="">Todas las zonas</option>
+        <option>Norte</option><option>Sur</option><option>Centro</option>
+        <option>Este</option><option>Oeste</option><option>Sacaba</option><option>Quillacollo</option>
+      </select>
+    </div>
+    <button onclick="generarReporte('restaurantes')" class="rep-btn">
+      <i class="fa-solid fa-download"></i> Generar y Descargar CSV
+    </button>
+  </div>
+
+  <!-- Reporte 3: Pedidos por zona -->
+  <div class="table-card reporte-card" data-reporte="zonas">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,#2a9d8f,#21867a);
+                  border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">
+        <i class="fa-solid fa-map-location-dot"></i>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--negro);">Pedidos por Zona</div>
+        <div style="font-size:11px;color:var(--texto-ter);">Cobertura geográfica Cochabamba</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--texto-sec);line-height:1.6;margin-bottom:1.25rem;">
+      Distribución de pedidos por zona geográfica de Cochabamba: Norte, Sur, Centro, Este, Oeste, Sacaba y Quillacollo.
+    </p>
+    <div style="height:36px;margin-bottom:1rem;"></div>
+    <button onclick="generarReporte('zonas')" class="rep-btn">
+      <i class="fa-solid fa-download"></i> Generar y Descargar CSV
+    </button>
+  </div>
+
+  <!-- Reporte 4: Historial entregas -->
+  <div class="table-card reporte-card" data-reporte="entregas">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--rojo),#ff6b7a);
+                  border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">
+        <i class="fa-solid fa-truck-fast"></i>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--negro);">Historial de Entregas</div>
+        <div style="font-size:11px;color:var(--texto-ter);">Repartidores y tiempos</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--texto-sec);line-height:1.6;margin-bottom:1.25rem;">
+      Historial completo de entregas con repartidor asignado, zona de entrega y fechas de asignación y aceptación.
+    </p>
+    <div style="height:36px;margin-bottom:1rem;"></div>
+    <button onclick="generarReporte('entregas')" class="rep-btn">
+      <i class="fa-solid fa-download"></i> Generar y Descargar CSV
+    </button>
+  </div>
+
+</div>
+
+<!-- Vista previa del reporte -->
+<div class="table-card" id="preview-section" style="display:none;">
+  <div class="table-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+    <span><i class="fa-solid fa-eye"></i> Vista previa — <span id="preview-title">Reporte</span></span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span id="preview-count" style="font-size:11px;color:var(--texto-ter);"></span>
+      <button onclick="descargarPreview()" class="rep-btn" style="padding:6px 14px;font-size:12px;">
+        <i class="fa-solid fa-file-csv"></i> Descargar
+      </button>
+    </div>
+  </div>
+  <div id="preview-chart" style="height:200px;margin-bottom:1.5rem;">
+    <canvas id="chart-preview"></canvas>
+  </div>
+  <table id="tabla-preview" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead id="thead-preview"></thead>
+    <tbody id="tbody-preview"></tbody>
+  </table>
+</div>
+
+<!-- Toast -->
+<div id="rep-toast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;
+     background:var(--negro);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;
+     border-left:4px solid var(--rojo-claro);box-shadow:0 8px 30px rgba(21,11,8,.25);
+     display:flex;align-items:center;gap:10px;">
+  <i class="fa-solid fa-circle-check" style="color:var(--rojo-claro);"></i>
+  <span id="rep-toast-msg">Reporte generado</span>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+.reporte-card{transition:all .3s cubic-bezier(.4,0,.2,1);}
+.reporte-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(21,11,8,.09);}
+.rep-btn{width:100%;background:var(--negro);color:#fff;border:none;border-radius:10px;padding:10px;
+         font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-ui);
+         display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+.rep-btn:hover{background:var(--rojo-claro);transform:translateY(-1px);}
+.rep-select{background:var(--crema);border:1px solid var(--crema-borde);border-radius:8px;
+            padding:7px 10px;font-size:12px;font-family:var(--font-ui);color:var(--negro);outline:none;}
+.rep-select:focus{border-color:var(--rojo-claro);}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let previewData   = null;
+let previewTitle  = "";
+let previewChart  = null;
+
+const APIS = {
+  ventas:       () => `/dashboard/api/admin/ventas-mes?anio=${document.getElementById("r-anio-ventas")?.value||""}`,
+  restaurantes: () => `/dashboard/api/admin/ranking?zona=${document.getElementById("r-zona-rest")?.value||""}`,
+  zonas:        () => `/dashboard/api/admin/pedidos-zona`,
+  entregas:     () => `/dashboard/api/repartidor/historial`,
+};
+
+async function generarReporte(tipo) {
+  const url = APIS[tipo]?.();
+  if (!url) return;
+  const d = await fetchData(url);
+  if (!d) { mostrarToast("Error al conectar con la base de datos", false); return; }
+
+  previewData  = d;
+  previewTitle = d.title || tipo;
+
+  document.getElementById("preview-section").style.display = "block";
+  document.getElementById("preview-title").textContent = previewTitle;
+  document.getElementById("preview-section").scrollIntoView({ behavior: "smooth" });
+
+  // Gráfico de preview
+  if (d.labels && d.data) {
+    if (previewChart) { previewChart.destroy(); previewChart = null; }
+    const tipo_chart = tipo === "ventas" ? "line" : (tipo === "zonas" ? "bar" : "bar");
+    previewChart = crearGrafico("chart-preview", tipo_chart, d.labels, d.data,
+      { money: tipo === "ventas", label: d.title });
+    document.getElementById("preview-chart").style.display = "block";
+  } else {
+    document.getElementById("preview-chart").style.display = "none";
+  }
+
+  // Tabla — destruir instancia previa completamente antes de cambiar estructura
+  if ($.fn.DataTable.isDataTable("#tabla-preview")) {
+    $("#tabla-preview").DataTable().clear().destroy();
+  }
+
+  const thead = document.getElementById("thead-preview");
+  const tbody = document.getElementById("tbody-preview");
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  if (d.columns && d.rows) {
+    // Datos tabulares (ranking, historial)
+    thead.innerHTML = "<tr>" + d.columns.map(c=>`<th>${c}</th>`).join("") + "</tr>";
+    tbody.innerHTML = d.rows.map(row =>
+      "<tr>" + Object.values(row).map(v=>`<td>${v??'—'}</td>`).join("") + "</tr>"
+    ).join("") || `<tr><td colspan="${d.columns.length}" class="text-center py-3" style="color:var(--texto-ter);">Sin datos</td></tr>`;
+    document.getElementById("preview-count").textContent = `${d.rows.length} registros`;
+  } else if (d.labels && d.data) {
+    // Datos gráficos
+    thead.innerHTML = "<tr><th>Dimensión</th><th>Valor</th></tr>";
+    tbody.innerHTML = d.labels.map((l,i)=>
+      `<tr><td style="font-weight:500;">${l}</td>
+       <td style="font-weight:600;color:var(--negro);">
+         ${tipo==="ventas"?`Bs ${Number(d.data[i]).toLocaleString("es-BO",{minimumFractionDigits:2})}`:Number(d.data[i]).toLocaleString("es-BO")}
+       </td></tr>`
+    ).join("") || `<tr><td colspan="2" class="text-center py-3" style="color:var(--texto-ter);">Sin datos</td></tr>`;
+    document.getElementById("preview-count").textContent = `${d.labels.length} registros`;
+  }
+
+  $("#tabla-preview").DataTable({ pageLength:10, language:{
+    search:"Buscar:", lengthMenu:"Mostrar _MENU_",
+    info:"_START_–_END_ de _TOTAL_", paginate:{next:"›",previous:"‹"}
+  }});
+
+  mostrarToast(`Reporte "${previewTitle}" cargado · ${d.rows?.length || d.labels?.length || 0} registros`);
+}
+
+function descargarPreview() {
+  if (!previewData) return;
+  let csv = "data:text/csv;charset=utf-8,";
+  if (previewData.columns && previewData.rows) {
+    csv += previewData.columns.join(",") + "\n";
+    previewData.rows.forEach(r => {
+      csv += Object.values(r).map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(",") + "\n";
+    });
+  } else if (previewData.labels && previewData.data) {
+    csv += "Dimension,Valor\n";
+    previewData.labels.forEach((l,i) => { csv += `"${l}","${previewData.data[i]}"\n`; });
+  }
+  const link = document.createElement("a");
+  link.href = encodeURI(csv);
+  link.download = `Foodly_${previewTitle.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  mostrarToast("Archivo CSV descargado correctamente");
+}
+
+function mostrarToast(msg, ok=true) {
+  const t = document.getElementById("rep-toast");
+  const m = document.getElementById("rep-toast-msg");
+  if (!t || !m) return;
+  m.textContent = msg;
+  t.style.display = "flex";
+  t.style.borderLeftColor = ok ? "var(--rojo-claro)" : "var(--rojo)";
+  setTimeout(() => { t.style.display = "none"; }, 3500);
+}
+</script>
+{% endblock %}

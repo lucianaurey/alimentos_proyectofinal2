@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}{{ restaurante.nombre }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;gap:14px;">
+  <a href="{{ url_for('restaurantes.lista') }}"
+     style="width:38px;height:38px;background:var(--crema);border:1px solid var(--crema-borde);
+            border-radius:10px;display:flex;align-items:center;justify-content:center;
+            color:var(--texto-sec);text-decoration:none;transition:all .2s;flex-shrink:0;"
+     onmouseover="this.style.background='var(--negro)';this.style.color='#fff';"
+     onmouseout="this.style.background='var(--crema)';this.style.color='var(--texto-sec)';">
+    <i class="fa-solid fa-arrow-left"></i>
+  </a>
+  <div>
+    <h1 style="display:flex;align-items:center;gap:10px;">
+      <span style="width:40px;height:40px;background:var(--negro);color:var(--rojo-claro);border-radius:10px;
+                   display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;">
+        {{ restaurante.nombre[0]|upper }}
+      </span>
+      {{ restaurante.nombre }}
+    </h1>
+    <p>Análisis individual · Menú: {{ restaurante.menu.nombre_menu if restaurante.menu else '—' }}</p>
+  </div>
+</div>
+
+<!-- Info cards -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:2rem;">
+  <div class="kpi-card">
+    <div class="kpi-icon"><i class="fa-solid fa-utensils"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ restaurante.nombre }}</div>
+      <div class="kpi-label">Nombre del restaurante</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon icon-orange"><i class="fa-solid fa-clock"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value" style="font-size:14px;">{{ restaurante.horario_atencion or '—' }}</div>
+      <div class="kpi-label">Horario de atención</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon icon-teal"><i class="fa-solid fa-location-dot"></i></div>
+    <div class="kpi-body">
+      {% set dir = restaurante.direcciones.first() %}
+      <div class="kpi-value" style="font-size:14px;">{{ dir.zona if dir else '—' }}</div>
+      <div class="kpi-label">Zona · {{ dir.ciudad if dir else '—' }}</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon icon-red"><i class="fa-solid fa-phone"></i></div>
+    <div class="kpi-body">
+      {% set tel = restaurante.telefonos.first() %}
+      <div class="kpi-value" style="font-size:14px;">{{ tel.numero_telefono if tel else '—' }}</div>
+      <div class="kpi-label">Teléfono</div>
+    </div>
+  </div>
+</div>
+
+<!-- Productos -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-box"></i></div>
+  <span class="section-divider__text">Productos del restaurante</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-title"><i class="fa-solid fa-list"></i> Catálogo de productos</div>
+  <table id="tabla-productos" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Descripción</th>
+        <th>Stock</th>
+        <th>Proveedor</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pr in restaurante.productos %}
+      <tr>
+        <td style="font-weight:500;">{{ pr.producto.nombre }}</td>
+        <td style="color:var(--texto-sec);">{{ pr.producto.descripcion or '—' }}</td>
+        <td>
+          {% set stock = pr.producto.stock_disponible or 0 %}
+          {% if stock > 10 %}
+            <span class="stock-ok">{{ stock }}</span>
+          {% elif stock > 0 %}
+            <span class="stock-low">{{ stock }}</span>
+          {% else %}
+            <span class="stock-out">0</span>
+          {% endif %}
+        </td>
+        <td style="color:var(--texto-ter);">{{ pr.producto.proveedor.nombre if pr.producto.proveedor else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4" class="text-center py-3" style="color:var(--texto-ter);">
+          <i class="fa-solid fa-box-open" style="font-size:1.5rem;opacity:.3;display:block;margin-bottom:8px;"></i>
+          Sin productos registrados
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+.stock-ok  { font-size:11px; padding:2px 10px; border-radius:10px; font-weight:500; background:#EAF3DE; color:#27500A; }
+.stock-low { font-size:11px; padding:2px 10px; border-radius:10px; font-weight:500; background:#FAEEDA; color:#633806; }
+.stock-out { font-size:11px; padding:2px 10px; border-radius:10px; font-weight:500; background:#FCEBEB; color:#791F1F; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if ($("#tabla-productos tbody tr").length > 1) {
+    $("#tabla-productos").DataTable({
+      pageLength: 10,
+      language: { search:"Buscar:", lengthMenu:"Mostrar _MENU_",
+        info:"_START_–_END_ de _TOTAL_", paginate:{next:"›",previous:"‹"} }
+    });
+  }
+});
+</script>
+{% endblock %}

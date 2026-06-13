@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Empleado{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fa-solid fa-chart-bar"></i>Dashboard Empleado</h1>
+  <p>Seguimiento operativo de pedidos, productos y rendimiento · {{ current_user.nombre_completo }}</p>
+</div>
+
+<!-- KPIs -->
+<div class="kpis-grid" id="kpis-container">
+  {% for _ in range(4) %}
+  <div class="col">
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa-solid fa-spinner fa-spin" style="color:var(--rojo-claro);"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value"><span class="skeleton" style="width:80px;display:inline-block;">&nbsp;</span></div>
+        <div class="kpi-label"><span class="skeleton" style="width:120px;display:inline-block;">&nbsp;</span></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Section: Análisis Operativo -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-chart-pie"></i></div>
+  <span class="section-divider__text">Análisis Operativo</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="charts-grid-2">
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-circle-half-stroke"></i>Estado de mis Pedidos
+    </div>
+    <div class="chart-canvas-lg" style="display:flex;align-items:center;justify-content:center;">
+      <canvas id="chart-pedidos-estado"></canvas>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-fire"></i>Top Productos Más Vendidos
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-productos"></canvas></div>
+  </div>
+</div>
+
+<!-- Section: Pedidos por Hora e Ingresos por Método -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-clock"></i></div>
+  <span class="section-divider__text">Tipo de Pago e Ingresos por Método</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="charts-grid-2">
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-credit-card"></i>Pedidos por Tipo de Pago
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-horas"></canvas></div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-wallet"></i>Ingresos por Método de Entrega
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-ingresos-metodo"></canvas></div>
+  </div>
+</div>
+
+<!-- Section: Pedidos Recientes -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-receipt"></i></div>
+  <span class="section-divider__text">Pedidos Recientes</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-title">
+    <i class="fa-solid fa-receipt"></i>Últimos Pedidos
+  </div>
+  <table id="tabla-pedidos" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead id="thead-pedidos"></thead>
+    <tbody id="tbody-pedidos">
+      <tr><td colspan="6" class="text-center py-3" style="color:var(--texto-ter);">Cargando…</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- emp_id inyectado desde Flask para filtrar por empleado logueado -->
+<script>
+  const EMP_ID = {{ emp_id | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard_empleado.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Restaurantes{% endblock %}
+
+{% block content %}
+
+{# ── Cabecera ─────────────────────────────────── #}
+<div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1><i class="fa-solid fa-utensils" style="color:var(--rojo-claro);margin-right:8px;"></i>Restaurantes</h1>
+    <p>Directorio completo de restaurantes registrados en la plataforma Foodly.</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="font-size:12px;color:var(--texto-ter);">
+      <i class="fa-solid fa-store"></i>
+      <strong style="color:var(--negro);">{{ restaurantes | length }}</strong> registros
+    </span>
+  </div>
+</div>
+
+{# ── Tabla ────────────────────────────────────── #}
+<div class="table-card">
+  <div class="table-card-title">
+    <i class="fa-solid fa-list" style="color:var(--rojo-claro);margin-right:6px;"></i>
+    Lista de Restaurantes
+  </div>
+
+  <table id="tabla-restaurantes" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead>
+      <tr style="font-size:11px;color:var(--texto-ter);">
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Zona</th>
+        <th>Teléfono</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rest in restaurantes %}
+      <tr>
+        <td style="color:var(--texto-ter);font-size:11px;">{{ rest.id_restaurante }}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;background:var(--negro);color:var(--rojo-claro);
+                        border-radius:8px;display:flex;align-items:center;justify-content:center;
+                        font-size:13px;font-weight:600;flex-shrink:0;">
+              {{ rest.nombre[0] | upper }}
+            </div>
+            <span style="font-weight:500;">{{ rest.nombre }}</span>
+          </div>
+        </td>
+        <td>
+          {% if rest.descripcion %}
+            <span style="font-size:11px;background:var(--crema);border:.5px solid var(--crema-borde);
+                         padding:2px 10px;border-radius:10px;">
+              {{ rest.descripcion[:40] }}{% if rest.descripcion|length > 40 %}…{% endif %}
+            </span>
+          {% else %}
+            <span style="color:var(--texto-ter);font-size:11px;">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% set dir = rest.direcciones.first() %}
+          {% if dir and dir.zona %}
+            <span style="font-size:11px;background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:10px;">
+              <i class="fa-solid fa-location-dot" style="font-size:9px;"></i> {{ dir.zona }}
+            </span>
+          {% else %}
+            <span style="color:var(--texto-ter);font-size:11px;">—</span>
+          {% endif %}
+        </td>
+        <td style="color:var(--texto-sec);">
+          {% set tel = rest.telefonos.first() %}
+          {% if tel %}{{ tel.numero_telefono }}{% else %}<span style="color:var(--texto-ter);">—</span>{% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('restaurantes.detalle', id=rest.id_restaurante) }}"
+             class="btn btn-sm"
+             style="background:var(--negro);color:#fff;border-radius:6px;font-size:11px;padding:4px 12px;">
+            <i class="fa-solid fa-eye"></i> Ver
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="text-center py-4" style="color:var(--texto-ter);">
+          <i class="fa-solid fa-utensils fa-2x" style="opacity:.3;display:block;margin-bottom:8px;"></i>
+          No hay restaurantes registrados
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if ($('#tabla-restaurantes tbody tr').length > 1) {
+    $('#tabla-restaurantes').DataTable({
+      pageLength: 15,
+      order: [[1, 'asc']],
+      language: {
+        search:     'Buscar:',
+        lengthMenu: 'Mostrar _MENU_ filas',
+        info:       'Mostrando _START_–_END_ de _TOTAL_ restaurantes',
+        paginate:   { next: '›', previous: '‹' },
+        emptyTable: 'No hay restaurantes disponibles',
+        zeroRecords: 'Sin resultados para la búsqueda',
+      },
+      columnDefs: [
+        { orderable: false, targets: [5] }  // Columna Acciones no ordenable
+      ]
+    });
+  }
+});
+</script>
+{% endblock %}

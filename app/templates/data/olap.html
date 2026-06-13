@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Análisis OLAP{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fa-solid fa-table-cells"></i> Análisis OLAP</h1>
+  <p>Consultas multidimensionales por zona, mes, restaurante y canal · Base de datos en tiempo real</p>
+</div>
+
+<!-- Controles OLAP -->
+<div class="table-card" style="margin-bottom:1.5rem;">
+  <div class="table-card-title"><i class="fa-solid fa-sliders"></i> Parámetros de Consulta</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;align-items:end;">
+    <div>
+      <label class="olap-lbl">Año</label>
+      <select id="o-anio" class="olap-sel">
+        <option value="">Todos</option>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026" selected>2026</option>
+      </select>
+    </div>
+    <div>
+      <label class="olap-lbl">Mes</label>
+      <select id="o-mes" class="olap-sel">
+        <option value="">Todos</option>
+        {% for m,n in [('1','Enero'),('2','Febrero'),('3','Marzo'),('4','Abril'),('5','Mayo'),
+                       ('6','Junio'),('7','Julio'),('8','Agosto'),('9','Septiembre'),
+                       ('10','Octubre'),('11','Noviembre'),('12','Diciembre')] %}
+        <option value="{{ m }}">{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="olap-lbl">Zona</label>
+      <select id="o-zona" class="olap-sel">
+        <option value="">Todas</option>
+        <option>Norte</option><option>Sur</option><option>Centro</option>
+        <option>Este</option><option>Oeste</option>
+        <option>Sacaba</option><option>Quillacollo</option>
+      </select>
+    </div>
+    <div>
+      <label class="olap-lbl">Métrica</label>
+      <select id="o-metrica" class="olap-sel">
+        <option value="ingresos">Ingresos (Bs)</option>
+        <option value="pedidos">Volumen pedidos</option>
+        <option value="zonas">Por zona</option>
+        <option value="estado">Por estado</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="ejecutarOLAP()" class="olap-btn-run">
+        <i class="fa-solid fa-play"></i> Ejecutar
+      </button>
+      <button onclick="exportarCSV()" class="olap-btn-exp">
+        <i class="fa-solid fa-file-csv"></i> CSV
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Resultados -->
+<div class="charts-grid-2" style="margin-bottom:1.5rem;">
+  <div class="table-card" style="position:relative;">
+    <div id="olap-loader" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.85);
+         border-radius:18px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:10;">
+      <div class="olap-spinner"></div>
+      <span style="font-size:12px;color:var(--texto-sec);">Procesando consulta...</span>
+    </div>
+    <div class="table-card-title" id="olap-chart-title">
+      <i class="fa-solid fa-chart-bar"></i> Resultado Visual
+    </div>
+    <div class="chart-canvas-lg"><canvas id="olap-chart"></canvas></div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title"><i class="fa-solid fa-circle-info"></i> Resumen del resultado</div>
+    <div id="olap-summary" style="display:flex;flex-direction:column;gap:12px;padding-top:8px;">
+      <div style="color:var(--texto-ter);font-size:13px;text-align:center;padding:2rem 0;">
+        <i class="fa-solid fa-play-circle" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px;"></i>
+        Ejecuta una consulta para ver el resumen
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabla de datos -->
+<div class="table-card">
+  <div class="table-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+    <span><i class="fa-solid fa-table"></i> Datos detallados</span>
+    <span id="olap-rows-count" style="font-size:11px;color:var(--texto-ter);font-weight:400;"></span>
+  </div>
+  <table id="tabla-olap" class="table table-hover" style="font-size:13px;width:100%;">
+    <thead id="thead-olap"></thead>
+    <tbody id="tbody-olap">
+      <tr><td colspan="5" class="text-center py-4" style="color:var(--texto-ter);">
+        <i class="fa-solid fa-table" style="font-size:1.5rem;opacity:.3;display:block;margin-bottom:8px;"></i>
+        Configura los parámetros y ejecuta la consulta
+      </td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+.olap-lbl{font-size:10px;font-weight:600;color:var(--texto-sec);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;}
+.olap-sel{width:100%;background:var(--crema);border:1px solid var(--crema-borde);border-radius:10px;
+          padding:9px 12px;font-size:13px;color:var(--negro);font-family:var(--font-ui);outline:none;transition:all .2s;}
+.olap-sel:focus{border-color:var(--rojo-claro);box-shadow:0 0 0 3px rgba(226,91,56,.1);}
+.olap-btn-run{background:var(--negro);color:#fff;border:none;border-radius:10px;padding:10px 20px;
+              font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-ui);
+              transition:all .2s;display:flex;align-items:center;gap:6px;}
+.olap-btn-run:hover{background:var(--rojo-claro);transform:translateY(-1px);}
+.olap-btn-exp{background:var(--crema);color:var(--negro);border:1px solid var(--crema-borde);
+              border-radius:10px;padding:10px 16px;font-size:13px;cursor:pointer;
+              font-family:var(--font-ui);transition:all .2s;display:flex;align-items:center;gap:6px;}
+.olap-btn-exp:hover{border-color:var(--negro);}
+.olap-spinner{width:36px;height:36px;border:3px solid rgba(226,91,56,.15);border-top-color:var(--rojo-claro);
+              border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.summary-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;
+             border-bottom:.5px solid var(--crema-borde);}
+.summary-row:last-child{border-bottom:none;}
+.summary-label{font-size:12px;color:var(--texto-sec);}
+.summary-value{font-size:13px;font-weight:600;color:var(--negro);}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let olapChart = null;
+let olapData  = null;
+
+function getFiltros() {
+  return new URLSearchParams({
+    anio: document.getElementById("o-anio").value,
+    mes:  document.getElementById("o-mes").value,
+    zona: document.getElementById("o-zona").value,
+  });
+}
+
+async function ejecutarOLAP() {
+  const metrica = document.getElementById("o-metrica").value;
+  const loader  = document.getElementById("olap-loader");
+  loader.style.display = "flex";
+
+  const rutas = {
+    ingresos: `/dashboard/api/admin/ventas-mes?${getFiltros()}`,
+    pedidos:  `/dashboard/api/admin/top-restaurantes?${getFiltros()}`,
+    zonas:    `/dashboard/api/admin/pedidos-zona?${getFiltros()}`,
+    estado:   `/dashboard/api/admin/pedidos-estado`,
+  };
+
+  const d = await fetchData(rutas[metrica]);
+  loader.style.display = "none";
+  if (!d) return;
+
+  olapData = d;
+
+  // Gráfico
+  const tipo = metrica === "estado" ? "doughnut" : (metrica === "ingresos" ? "line" : "bar");
+  document.getElementById("olap-chart-title").innerHTML =
+    `<i class="fa-solid fa-chart-bar"></i> ${d.title || "Resultado"}`;
+
+  if (olapChart) { olapChart.destroy(); olapChart = null; }
+  olapChart = crearGrafico("olap-chart", tipo, d.labels, d.data,
+    { money: metrica === "ingresos", label: d.title });
+
+  // Tabla
+  const cols = {
+    ingresos: ["Período","Ingresos (Bs)"],
+    pedidos:  ["Restaurante","Ingresos (Bs)"],
+    zonas:    ["Zona","Pedidos"],
+    estado:   ["Estado","Cantidad"],
+  };
+  const thead = document.getElementById("thead-olap");
+  const tbody = document.getElementById("tbody-olap");
+  thead.innerHTML = "<tr>" + cols[metrica].map(c=>`<th>${c}</th>`).join("") + "</tr>";
+  tbody.innerHTML = (d.labels||[]).map((l,i)=>`
+    <tr>
+      <td style="font-weight:500;">${l}</td>
+      <td style="color:var(--negro);font-weight:600;">
+        ${metrica==="ingresos"?`Bs ${Number(d.data[i]).toLocaleString("es-BO",{minimumFractionDigits:2})}`
+          :Number(d.data[i]).toLocaleString("es-BO")}
+      </td>
+    </tr>`).join("") || `<tr><td colspan="2" class="text-center py-3" style="color:var(--texto-ter);">Sin datos</td></tr>`;
+
+  document.getElementById("olap-rows-count").textContent = `${(d.labels||[]).length} registros`;
+
+  // Resumen
+  const total  = (d.data||[]).reduce((a,b)=>a+Number(b),0);
+  const maxVal = Math.max(...(d.data||[0]));
+  const maxIdx = (d.data||[]).indexOf(maxVal);
+  document.getElementById("olap-summary").innerHTML = `
+    <div class="summary-row"><span class="summary-label">Total acumulado</span>
+      <span class="summary-value">${metrica==="ingresos"?`Bs ${total.toLocaleString("es-BO",{minimumFractionDigits:2})}`:total.toLocaleString("es-BO")}</span></div>
+    <div class="summary-row"><span class="summary-label">Registros</span>
+      <span class="summary-value">${(d.labels||[]).length}</span></div>
+    <div class="summary-row"><span class="summary-label">Valor máximo</span>
+      <span class="summary-value" style="color:var(--rojo-claro);">${metrica==="ingresos"?`Bs ${maxVal.toLocaleString("es-BO",{minimumFractionDigits:2})}`:maxVal.toLocaleString("es-BO")}</span></div>
+    <div class="summary-row"><span class="summary-label">Dimensión líder</span>
+      <span class="summary-value">${(d.labels||[])[maxIdx]||"—"}</span></div>
+    <div class="summary-row"><span class="summary-label">Promedio</span>
+      <span class="summary-value">${(d.labels||[]).length>0?(metrica==="ingresos"?`Bs ${(total/(d.labels||[1]).length).toLocaleString("es-BO",{minimumFractionDigits:2})}`:Math.round(total/(d.labels||[1]).length).toLocaleString("es-BO")):"—"}</span></div>
+  `;
+
+  if ($.fn.DataTable.isDataTable("#tabla-olap")) { $("#tabla-olap").DataTable().destroy(); }
+  $("#tabla-olap").DataTable({ pageLength:15, language:{
+    search:"Buscar:", lengthMenu:"Mostrar _MENU_",
+    info:"_START_–_END_ de _TOTAL_", paginate:{next:"›",previous:"‹"}
+  }});
+}
+
+function exportarCSV() {
+  if (!olapData) { alert("Ejecuta una consulta primero."); return; }
+  const { labels, data, title } = olapData;
+  let csv = `data:text/csv;charset=utf-8,Dimension,Valor\n`;
+  (labels||[]).forEach((l,i) => { csv += `"${l}","${data[i]}"\n`; });
+  const link = document.createElement("a");
+  link.href = encodeURI(csv);
+  link.download = `Foodly_OLAP_${title||"reporte"}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+document.addEventListener("DOMContentLoaded", ejecutarOLAP);
+</script>
+{% endblock %}

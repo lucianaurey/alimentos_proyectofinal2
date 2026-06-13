@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ title or 'Foodly · Plataforma de Delivery Cochabamba' }}</title>
+  <meta name="description" content="Foodly — Tu plataforma integral de delivery en Cochabamba. Restaurantes, minimarkets y productos en un solo lugar."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}"/>
+</head>
+<body>
+
+<!-- Mensajes Flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container" id="flashContainer">
+      {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">
+          <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-circle-xmark{% else %}fa-circle-info{% endif %}"></i>
+          <span>{{ message }}</span>
+          <button onclick="this.parentElement.remove()" class="flash-close">✕</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar" id="navbar">
+  <a href="{{ url_for('main.landing') }}" class="nav-brand">
+    <div class="nav-logo-circle" style="background:transparent;">
+      <img src="{{ url_for('static', filename='img/foodly_logo.png') }}" alt="Foodly Logo" style="width:40px; height:40px; border-radius:12px; object-fit:cover;">
+    </div>
+    <span class="nav-brand-name">Food<span>ly</span></span>
+  </a>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#restaurantes">Restaurantes</a></li>
+    <li><a href="#minimarket">Minimarket</a></li>
+    <li><a href="#productos">Productos</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button class="cart-btn" id="cartBtn" type="button">
+      🛒 Carrito
+      <span class="cart-badge hidden" id="cartBadge">0</span>
+    </button>
+    <button class="btn-acceder" onclick="window.location.href='{{ url_for('auth.login') }}'">
+      <i class="fa-solid fa-arrow-right-to-bracket"></i> Acceder
+    </button>
+    <button class="hamburger" id="hamburger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="nav-mobile" id="navMobile">
+  <a href="#inicio">Inicio</a>
+  <a href="#restaurantes">Restaurantes</a>
+  <a href="#minimarket">Minimarket</a>
+  <a href="#productos">Productos</a>
+  <a href="#contacto">Contacto</a>
+  <a href="{{ url_for('auth.login') }}">Acceder</a>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero" id="inicio">
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">🚀 Entrega rápida · Cochabamba</div>
+
+      <h1 class="hero-title">
+        Tu comida favorita,<br>
+        <span class="highlight">un clic de distancia.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Restaurantes, minimarkets y productos en un solo lugar. Gestiona pedidos, inventarios y entregas con nuestra plataforma integral.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="#restaurantes" class="btn-primary">🍽️ Ver Restaurantes</a>
+        <a href="#productos" class="btn-outline">📦 Explorar Productos</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="stat-restaurantes">—</div>
+          <div class="hero-stat-label">Restaurantes</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="stat-minimarkets">—</div>
+          <div class="hero-stat-label">Minimarkets</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="stat-pedidos">—</div>
+          <div class="hero-stat-label">Pedidos</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="stat-zonas">—</div>
+          <div class="hero-stat-label">Zonas CBB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-img-wrap">
+      <img
+        src="{{ url_for('static', filename='img/hero_delivery.png') }}"
+        onerror="this.src='https://placehold.co/520x390/ff5f38/fff?text=Foodly'"
+        alt="Foodly — Comida a domicilio"
+      >
+      <div class="hero-float-badge top">
+        <span class="dot"></span> Pedido en camino
+      </div>
+      <div class="hero-float-badge bottom">
+        ⏱️ Entrega en &lt;30 min
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS BAR ── -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-item">
+      <div class="stat-value" id="bar-restaurantes">—</div>
+      <div class="stat-label">Restaurantes</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="bar-minimarkets">—</div>
+      <div class="stat-label">Minimarkets</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="bar-productos">—</div>
+      <div class="stat-label">Productos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="bar-pedidos">—</div>
+      <div class="stat-label">Pedidos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">&lt;30'</div>
+      <div class="stat-label">Entrega Promedio</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHOWCASE BANNER ── -->
+<div class="showcase-banner">
+  <div class="showcase-item">
+    <img
+      src="{{ url_for('static', filename='img/restaurant_section.png') }}"
+      onerror="this.src='https://placehold.co/800x400/2A3056/67FFF2?text=Restaurantes'"
+      alt="Restaurantes Foodly"
+    >
+    <div class="showcase-overlay">
+      <div class="showcase-icon">🍽️</div>
+      <div class="showcase-title">Restaurantes</div>
+      <div class="showcase-desc">Los mejores sabores de Cochabamba, preparados con ingredientes frescos y entregados a tu puerta.</div>
+      <a href="#restaurantes" class="showcase-btn">Explorar restaurantes →</a>
+    </div>
+  </div>
+  <div class="showcase-item">
+    <img
+      src="{{ url_for('static', filename='img/minimarket_section.png') }}"
+      onerror="this.src='https://placehold.co/800x400/2A3056/67FFF2?text=Minimarket'"
+      alt="Minimarket Foodly"
+    >
+    <div class="showcase-overlay">
+      <div class="showcase-icon">🛒</div>
+      <div class="showcase-title">Minimarket</div>
+      <div class="showcase-desc">Todo lo que necesitas: snacks, bebidas, frutas y productos del hogar en minutos.</div>
+      <a href="#minimarket" class="showcase-btn">Ver minimarkets →</a>
+    </div>
+  </div>
+  <div class="showcase-item">
+    <img
+      src="{{ url_for('static', filename='img/product_showcase.png') }}"
+      onerror="this.src='https://placehold.co/800x400/2A3056/67FFF2?text=Productos'"
+      alt="Productos Foodly"
+    >
+    <div class="showcase-overlay">
+      <div class="showcase-icon">📦</div>
+      <div class="showcase-title">Productos</div>
+      <div class="showcase-desc">Productos artesanales, orgánicos y gourmet seleccionados para ti.</div>
+      <a href="#productos" class="showcase-btn">Ver productos →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESTAURANTES ── -->
+<section class="section" id="restaurantes">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-eyebrow">🍽️ Restaurantes</div>
+      <h2 class="section-title">Los mejores restaurantes cerca de ti</h2>
+      <p class="section-subtitle">Disfruta de la mejor gastronomía, desde comida rápida hasta alta cocina.</p>
+    </div>
+
+    {% if restaurantes %}
+    <div class="cards-grid">
+      {% for r in restaurantes %}
+      <div class="rest-card fade-in">
+        <div class="rest-card-img-wrap">
+            <img
+              class="rest-card-img"
+              src="{{ url_for('static', filename='img/' ~ r.img ~ '.png') }}"
+              onerror="this.src='{{ url_for('static', filename='img/placeholder_rest.png') }}'"
+              alt="{{ r.nombre }}"
+            >
+        </div>
+        <div class="rest-card-body">
+          <div class="rest-card-badges">
+            <span class="badge badge-green">● Abierto</span>
+            {% if r.telefono %}<span class="badge badge-gray">📞 {{ r.telefono }}</span>{% endif %}
+          </div>
+          <div class="rest-card-name">{{ r.nombre }}</div>
+          <div class="rest-card-desc">
+            {{ r.descripcion or 'Explora nuestro menú con los mejores sabores preparados con ingredientes frescos.' }}
+          </div>
+          <div class="rest-card-footer">
+            <span class="rest-card-addr">📍 {{ r.ciudad or r.calle or 'Cochabamba' }}</span>
+            <a href="{{ url_for('restaurantes.detalle', id=r.id_restaurante) }}" class="btn-sm">Ver menú →</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state fade-in">
+      <div class="empty-state-icon">🍽️</div>
+      <h3>Cargando restaurantes...</h3>
+      <p>Pronto verás los mejores locales de Cochabamba.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── MINIMARKET ── -->
+<section class="section section-alt" id="minimarket">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-eyebrow">🛒 Minimarket</div>
+      <h2 class="section-title">Compras rápidas al instante</h2>
+      <p class="section-subtitle">Snacks, bebidas y más entregados en minutos.</p>
+    </div>
+
+    {% if minimarkets %}
+    <div class="mini-grid">
+      {% for m in minimarkets %}
+      <div class="mini-card fade-in">
+        <div class="mini-card-img-wrap">
+          <img
+            class="mini-card-img"
+            src="{{ url_for('static', filename='img/' ~ m.img ~ '.png') }}"
+            onerror="this.src='{{ url_for('static', filename='img/placeholder_minimarket.png') }}'"
+            alt="{{ m.nombre }}"
+          >
+        </div>
+        <div class="mini-card-body">
+          <div class="mini-card-name">{{ m.nombre }}</div>
+          {% if m.encargado %}<div class="mini-card-enc">👤 {{ m.encargado }}</div>{% endif %}
+          <div class="mini-card-addr">📍 {{ m.ciudad or m.calle or 'Cochabamba' }}</div>
+          <a href="{{ url_for('minimarket.detalle', id=m.id_minimarket) }}" class="btn-sm" style="width:100%;justify-content:center">🛒 Ver productos</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state fade-in">
+      <div class="empty-state-icon">🛒</div>
+      <h3>Cargando minimarkets...</h3>
+      <p>Los mejores minimarkets de la ciudad.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── PRODUCTOS ── -->
+<section class="section" id="productos">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-eyebrow">📦 Productos</div>
+      <h2 class="section-title">Productos destacados</h2>
+      <p class="section-subtitle">La selección del día, disponible para entrega inmediata.</p>
+    </div>
+
+    {% if productos %}
+    <div class="prod-grid">
+      {% for p in productos %}
+      {% set stock = p.stock_disponible if p.stock_disponible is defined and p.stock_disponible is not none else 0 %}
+      <div class="prod-card fade-in" data-origen="{{ p.origen }}">
+        <div class="prod-card-img-wrap">
+          <img
+            class="prod-card-img"
+            src="{{ url_for('static', filename='img/' ~ p.img ~ '.png') }}"
+            onerror="this.src='{{ url_for('static', filename='img/placeholder_product.png') }}'"
+            alt="{{ p.nombre }}"
+          >
+          <span class="prod-card-origen badge {% if p.origen == 'Restaurante' %}badge-primary{% elif p.origen == 'Minimarket' %}badge-accent{% else %}badge-gray{% endif %}">
+            {{ p.origen }}
+          </span>
+        </div>
+        <div class="prod-card-body">
+          <div class="prod-card-name">{{ p.nombre }}</div>
+          <div class="prod-card-proveedor">🏭 {{ p.proveedor_nombre or 'Proveedor local' }}</div>
+          <div class="prod-card-footer">
+            <div>
+              <div class="prod-precio">Bs {{ '%.2f'|format((p.precio or 10)|float) }}</div>
+              {% if stock > 10 %}
+                <span class="stock-ok">✓ En stock ({{ stock }})</span>
+              {% elif stock > 0 %}
+                <span class="stock-low">⚡ Últimas {{ stock }} unidades</span>
+              {% else %}
+                <span class="stock-out">✗ Sin stock</span>
+              {% endif %}
+            </div>
+            <button
+              class="btn-add"
+              data-add-product="{{ p.id_producto }}"
+              data-nombre="{{ p.nombre }}"
+              data-precio="{{ p.precio or 10 }}"
+              data-img="{{ p.img }}"
+              {% if stock == 0 %}disabled title="Sin stock"{% endif %}
+              type="button"
+            >+</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state fade-in">
+      <div class="empty-state-icon">📦</div>
+      <h3>Cargando productos...</h3>
+      <p>El catálogo completo estará disponible pronto.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if promociones %}
+<!-- ── PROMOCIONES ── -->
+<section class="section section-alt" id="promociones">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-eyebrow">🎁 Promociones</div>
+      <h2 class="section-title">Ofertas exclusivas</h2>
+      <p class="section-subtitle">Usa estos códigos en tu próximo pedido y ahorra.</p>
+    </div>
+    <div class="promos-grid">
+      {% for promo in promociones %}
+      <div class="promo-card fade-in">
+        <div class="promo-tipo">{{ promo.tipo }}</div>
+        <div class="promo-valor">
+          {% if promo.valor %}
+            {% if promo.valor <= 1 %}
+              {{ (promo.valor * 100)|int }}% OFF
+            {% else %}
+              Bs {{ '%.0f'|format(promo.valor|float) }} de descuento
+            {% endif %}
+          {% else %}
+            Oferta especial
+          {% endif %}
+        </div>
+        <div class="promo-desc">{{ promo.descripcion_tipo or 'Descuento especial para tu próximo pedido.' }}</div>
+        {% if promo.codigo %}
+        <div class="promo-codigo-wrap">
+          <span class="promo-codigo">{{ promo.codigo }}</span>
+          <button class="btn-copy" data-copy="{{ promo.codigo }}" type="button">Copiar</button>
+        </div>
+        {% endif %}
+        <div class="promo-fechas">
+          📅 Válido hasta {{ promo.fecha_fin.strftime('%d/%m/%Y') if promo.fecha_fin else 'Sin fecha límite' }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if resenas %}
+<!-- ── RESEÑAS ── -->
+<section class="section" id="resenas">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-eyebrow">⭐ Reseñas</div>
+      <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+    </div>
+    <div class="reviews-grid">
+      {% for rev in resenas %}
+      {% set calif = (rev.calificacion|int) if rev.calificacion else 5 %}
+      <div class="review-card fade-in">
+        <div class="review-stars">{% for i in range(calif) %}⭐{% endfor %}</div>
+        <div class="review-comment">"{{ rev.comentario or rev.descripcion or 'Excelente servicio.' }}"</div>
+        <div class="review-author">Cliente Foodly</div>
+        <div class="review-date">{{ rev.horario_atencion.strftime('%d/%m/%Y') if rev.horario_atencion else '' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── CONTACTO ── -->
+<section class="section section-alt" id="contacto">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="section-eyebrow">✉️ Contacto</div>
+        <h2>¿Preguntas o sugerencias?</h2>
+        <p>Nuestro equipo está disponible para ayudarte en Cochabamba.</p>
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div class="contact-item-text">
+            <strong>Ubicación</strong>
+            <span>Cochabamba, Bolivia</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">⏰</div>
+          <div class="contact-item-text">
+            <strong>Horario</strong>
+            <span>Lun–Dom · 8:00 – 22:00</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📞</div>
+          <div class="contact-item-text">
+            <strong>Soporte</strong>
+            <span>+591 4 000-0000</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-card fade-in">
+        <form action="{{ url_for('main.contacto') }}" method="POST" id="contactForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Correo electrónico</label>
+              <input type="email" id="email" name="email" placeholder="tu@correo.com" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="asunto">Asunto</label>
+            <select id="asunto" name="asunto">
+              <option value="consulta">Consulta general</option>
+              <option value="pedido">Problema con pedido</option>
+              <option value="restaurante">Sugerir restaurante</option>
+              <option value="trabajo">Trabaja con nosotros</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje aquí..." required></textarea>
+          </div>
+          <button type="submit" class="btn-submit">📨 Enviar mensaje</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-brand-name">Food<span>ly</span></div>
+      <p class="footer-brand-desc">Plataforma integral de gestión de pedidos de alimentos, restaurantes y minimarkets en Cochabamba. Delivery rápido y confiable.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Plataforma</h4>
+      <div class="footer-links">
+        <a href="#restaurantes">Restaurantes</a>
+        <a href="#minimarket">Minimarkets</a>
+        <a href="#productos">Productos</a>
+        <a href="#promociones">Promociones</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Empresa</h4>
+      <div class="footer-links">
+        <a href="#">Nosotros</a>
+        <a href="#">Blog</a>
+        <a href="#contacto">Contacto</a>
+        <a href="#">Trabaja con nosotros</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Soporte</h4>
+      <div class="footer-links">
+        <a href="#">Ayuda</a>
+        <a href="#">Términos de uso</a>
+        <a href="#">Privacidad</a>
+        <a href="{{ url_for('auth.login') }}">Acceder</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Foodly · Todos los derechos reservados · Cochabamba, Bolivia</p>
+    <p>Hecho con ❤️ para la mejor experiencia de delivery</p>
+  </div>
+</footer>
+
+<!-- ── CARRITO SIDEBAR ── -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>🛒 Tu Carrito</h3>
+    <button class="cart-close" id="cartClose" type="button">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <div class="cart-empty-icon">🛒</div>
+      <p>Tu carrito está vacío</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <strong id="cartTotal">Bs 0.00</strong>
+    </div>
+    <button class="btn-submit" id="checkoutBtn" type="button">Realizar Pedido →</button>
+  </div>
+</div>
+
+<!-- URLs para el JS -->
+<script>
+  const LANDING_URLS = {
+    stats: "{{ url_for('main.api_landing_stats') }}",
+    login: "{{ url_for('auth.login') }}"
+  };
+</script>
+<script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+</body>
+</html>

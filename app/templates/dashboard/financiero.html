@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Financiero{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fa-solid fa-coins"></i>Dashboard Financiero</h1>
+  <p>Análisis de ingresos, comisiones y ticket promedio de la plataforma · Solo administradores</p>
+</div>
+
+<!-- KPIs -->
+<div class="kpis-grid" id="kpis-container">
+  {% for _ in range(4) %}
+  <div class="col">
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa-solid fa-spinner fa-spin" style="color:var(--rojo-claro);"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value"><span class="skeleton" style="width:80px;display:inline-block;">&nbsp;</span></div>
+        <div class="kpi-label"><span class="skeleton" style="width:120px;display:inline-block;">&nbsp;</span></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Section: Evolución -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-chart-line"></i></div>
+  <span class="section-divider__text">Evolución de Ingresos</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="table-card" style="margin-bottom:1.5rem;">
+  <div class="table-card-title">
+    <i class="fa-solid fa-chart-line"></i>Evolución mensual de ingresos (Bs)
+  </div>
+  <div class="chart-canvas-lg"><canvas id="chart-evolucion"></canvas></div>
+</div>
+
+<!-- Section: Por restaurante -->
+<div class="section-divider">
+  <div class="section-divider__icon"><i class="fa-solid fa-utensils"></i></div>
+  <span class="section-divider__text">Ingresos por Restaurante</span>
+  <div class="section-divider__line"></div>
+</div>
+
+<div class="charts-grid-2">
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-ranking-star"></i>Top restaurantes por ingresos
+    </div>
+    <div class="chart-canvas-lg"><canvas id="chart-restaurantes"></canvas></div>
+  </div>
+  <div class="table-card">
+    <div class="table-card-title">
+      <i class="fa-solid fa-chart-pie"></i>Distribución de pedidos por estado
+    </div>
+    <div class="chart-canvas-lg" style="display:flex;align-items:center;justify-content:center;">
+      <canvas id="chart-estados" style="max-width:280px;"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard_financiero.js') }}"></script>
+{% endblock %}
