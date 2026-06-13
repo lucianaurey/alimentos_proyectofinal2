@@ -30,7 +30,7 @@ async function cargarRestaurantes() {
   if (ex) ex.destroy();
 
   const barColors = (d.data || []).map((_, i) =>
-    `rgba(226,91,56,${Math.max(1 - i * 0.07, 0.35)})`
+    `rgba(67,176,175,${Math.max(1 - i * 0.07, 0.35)})`
   );
 
   new Chart(canvas, {
