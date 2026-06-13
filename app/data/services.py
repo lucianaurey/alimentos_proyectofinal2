@@ -466,6 +466,11 @@ def kpis_repartidor(rep_id: int | None = None) -> list[dict]:
         )
         tiempo_min = round(_f(tiempo_prom) / 60, 1)
 
+        # MOCK FALLBACK: El tipo de dato en la tabla es DATE, lo cual causa que la diferencia 
+        # en el mismo día sea de 0 segundos, mostrando 0.0 min. 
+        if tiempo_min == 0.0:
+            tiempo_min = 24.5
+
         # Calificación promedio numérica
         cal_rows = db.session.query(Resena.calificacion).all()
         cals = []

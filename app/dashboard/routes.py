@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from flask import Blueprint, jsonify, render_template, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app.auth.routes import role_required
 from app.data import services as svc
@@ -62,7 +62,6 @@ def admin_repartidores():
 @role_required("admin", "empleado")
 def empleado():
     from app.models import Empleado as EmpleadoModel
-    from flask_login import current_user
     emp = EmpleadoModel.query.filter_by(
         correo_electronico=current_user.correo_electronico
     ).first()
